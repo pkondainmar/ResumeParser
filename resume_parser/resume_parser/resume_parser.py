@@ -47,11 +47,13 @@ class ResumeParser(object):
         edu = utils.extract_education(
             [sent.string.strip() for sent in self.__nlp.sents])
         entities = utils.extract_entity_sections_grad(self.__text_raw)
+        address = utils.extract_address(self.__text)
         self.__details['name'] = name
         self.__details['email'] = email
         self.__details['mobile_number'] = mobile
         self.__details['skills'] = skills
         self.__details['education'] = edu
+        self.__details['address'] = address
         try:
             self.__details['experience'] = entities['experience']
             try:

@@ -270,6 +270,22 @@ def extract_email(text):
             return None
 
 
+def extract_address(text):
+    '''
+    Helper function to extract address from text
+
+    :param text: plain text extracted from resume file
+    '''
+    address = re.findall(
+        "^[0-9]+\s+([a-zA-Z]+|[a-zA-Z]+\s[a-zA-Z]+)$", text)
+
+    if address:
+        try:
+            return address[0].split()[0].strip(';')
+        except IndexError:
+            return None
+
+
 def extract_name(nlp_text, matcher):
     '''
     Helper function to extract name from spacy nlp text
