@@ -7,7 +7,7 @@ APP_WSGI_MODULE=resume_parser.wsgi # WSGI module name
 ADDRESS=0.0.0.0
 PORT=8000
 OS_ENV=/home/ubuntu/.env
-VIRTUAL_ENV_DIR=/home/ubuntu/env/inmail
+VIRTUAL_ENV_DIR=/home/ubuntu/ResumeParser/venv
 echo "Starting ResumeParser Server"
 
 # Loading Environment Variables
