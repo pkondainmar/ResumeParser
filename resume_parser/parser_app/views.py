@@ -11,6 +11,7 @@ from rest_framework.parsers import JSONParser
 from .serializers import UserDetailsSerializer, CompetenciesSerializer, MeasurableResultsSerializer, ResumeSerializer, ResumeDetailsSerializer
 import os
 
+
 def homepage(request):
     if request.method == 'POST':
         user = User.objects.get(id=1)
@@ -29,39 +30,40 @@ def homepage(request):
                     # saving the file
                     resume = Resume(user=user, resume=file)
                     resume.save()
-                    
+
                     # extracting resume entities
-                    parser = resume_parser.ResumeParser(os.path.join(settings.MEDIA_ROOT, resume.resume.name))
+                    parser = resume_parser.ResumeParser(
+                        os.path.join(settings.MEDIA_ROOT, resume.resume.name))
                     data = parser.get_extracted_data()
-                    
+
                     # User Details
                     # resume.name          = data.get('name')
                     # resume.email         = data.get('email')
                     # resume.education     = get_education(data.get('education'))
                     user_details = UserDetails()
-                    user_details.user           = user
-                    user_details.name           = data.get('name')
-                    user_details.email          = data.get('email')
-                    user_details.mobile_number  = data.get('mobile_number')
-                    user_details.skills         = ', '.join(data.get('skills'))
-                    user_details.years_of_exp   = data.get('total_experience')
+                    user_details.user = user
+                    user_details.name = data.get('name')
+                    user_details.email = data.get('email')
+                    user_details.mobile_number = data.get('mobile_number')
+                    user_details.skills = ', '.join(data.get('skills'))
+                    user_details.years_of_exp = data.get('total_experience')
                     user_details.save()
 
                     for comp in data.get('competencies'):
                         competencies = Competencies()
-                        competencies.user       = user
+                        competencies.user = user
                         competencies.competency = comp
                         competencies.save()
 
                     for mr in data.get('measurable_results'):
-                        measurable_results                   = MeasurableResults()
-                        measurable_results.user              = user
+                        measurable_results = MeasurableResults()
+                        measurable_results.user = user
                         measurable_results.measurable_result = mr
                         measurable_results.save()
 
                     # Resume Details
-                    resume_details          = ResumeDetails()
-                    resume_details.resume   = resume
+                    resume_details = ResumeDetails()
+                    resume_details.resume = resume
                     resume_details.page_nos = data.get('no_of_pages')
                     resume_details.save()
 
@@ -69,18 +71,22 @@ def homepage(request):
                     # measurable_results.append(data.get('measurable_results'))
                     # resume.save()
                 except IntegrityError:
-                    messages.warning(request, 'Duplicate resume found:', file.name)
+                    messages.warning(
+                        request, 'Duplicate resume found:', file.name)
                     return redirect('homepage')
 
             resumes = Resume.objects.filter(user=User.objects.get(id=1))
             user_detail = UserDetails.objects.get(user=user)
             messages.success(request, 'Resumes uploaded!')
-            
+
             competencies = data.get('competencies')
             measurable_results = data.get('measurable_results')
+            try:
+                overall_score = competencies.get(
+                    'score', 0) + measurable_results.get('score', 0)
+            except:
+                overall_score = 10
 
-            overall_score = competencies.get('score') + measurable_results.get('score')
-            
             if competencies:
                 context = {
                     'resumes': resumes,
@@ -90,7 +96,7 @@ def homepage(request):
                     'total_experience': data.get('total_experience'),
                     'user_details': user_detail,
                     'overall_score': overall_score
-                    }
+                }
             else:
                 context = {
                     'resumes': resumes,
@@ -100,11 +106,12 @@ def homepage(request):
                     'total_experience': data.get('total_experience'),
                     'user_details': user_detail,
                     'overall_score': overall_score
-                    }
+                }
             return render(request, 'base.html', context)
     else:
         form = UploadResumeModelForm()
     return render(request, 'base.html', {'form': form})
+
 
 def get_education(education):
     '''
@@ -114,6 +121,7 @@ def get_education(education):
     for edu in education:
         education_string += edu[0] + ' (' + str(edu[1]) + '), '
     return education_string.rstrip(', ')
+
 
 @csrf_exempt
 def user_detail(request, pk):
@@ -136,7 +144,8 @@ def user_detail(request, pk):
         comp_serializer = CompetenciesSerializer(comp, many=True)
         mr_serializer = MeasurableResultsSerializer(mr, many=True)
         resume_serializer = ResumeSerializer(resume)
-        resume_details_serializer = ResumeDetailsSerializer(resume_details, many=True)
+        resume_details_serializer = ResumeDetailsSerializer(
+            resume_details, many=True)
         user_details_serializer = UserDetailsSerializer(user_details)
 
         data = {}
